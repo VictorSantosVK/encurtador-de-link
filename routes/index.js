@@ -2,27 +2,12 @@ var express = require('express');
 var router = express.Router();
 const Link = require('../models/link');
 
-router.get('/:code/stats', async (req, res, next) => {
-  const code = req.params.code; 
-  const resultado = await Link.findOne({ where: { code } });
-  if (!resultado) return res.sendStatus(404);
-  res.render('stats', resultado.dataValues);
-});
-
-router.get('/:code', async (req, res, next) => {
-  const code = req.params.code;
-  const resultado = await Link.findOne({ where: { code } });
-  if (!resultado) return res.sendStatus(404);
-  resultado.hits++;
-  await resultado.save();
-
-  res.redirect(resultado.url);
-});
-
+// Rota para a página inicial
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Victor.ly' });
 });
 
+// Função para gerar um código aleatório de 5 caracteres
 function generateCode() {
   let text = '';
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -32,15 +17,38 @@ function generateCode() {
   return text;
 }
 
+// Rota para criar um novo link encurtado
 router.post('/new', async (req, res, next) => {
   const url = req.body.url;
-  console.log(url);
   const code = generateCode();
 
   const resultado = await Link.create({
     url,
     code
   });
+
+  res.render('shortened', resultado.dataValues);
+});
+
+// Rota para redirecionar o usuário com base no código do link
+router.get('/:code', async (req, res, next) => {
+  const code = req.params.code;
+  const resultado = await Link.findOne({ where: { code } });
+
+  if (!resultado) return res.sendStatus(404);
+
+  resultado.hits++;
+  await resultado.save();
+
+  res.redirect(resultado.url);
+});
+
+// Rota para exibir estatísticas de um link encurtado
+router.get('/:code/stats', async (req, res, next) => {
+  const code = req.params.code;
+  const resultado = await Link.findOne({ where: { code } });
+
+  if (!resultado) return res.sendStatus(404);
 
   res.render('stats', resultado.dataValues);
 });

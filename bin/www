@@ -8,7 +8,7 @@
   try {
     // Importações
     const database = require('../db');
-    const link = require('../models/link'); // Certifique-se de usar este modelo
+    const link = require('../models/link'); 
     const app = require('../app');
     const debug = require('debug')('url-shortener:server');
     const http = require('http');
